@@ -1,0 +1,84 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JS Digital Clock</title>
+    <style>
+      span.digit-container {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        font-size: 10vmax;
+        height: 10vmax;
+        line-height: 1em;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>JS Digital Clock</h1>
+    <span id="d1" class="digit-container">
+      <div class="digit">0</div>
+    </span>
+    <span id="d2" class="digit-container">
+      <div class="digit">0</div>
+    </span>
+    <span id="c1" class="digit-container">:</span>
+    <span id="d3" class="digit-container"><div class="digit">0</div></span>
+    <span id="d4" class="digit-container"><div class="digit">0</div></span>
+    <span id="c2" class="digit-container">:</span>
+    <span id="d5" class="digit-container"><div class="digit">0</div></span>
+    <span id="d6" class="digit-container"><div class="digit">0</div></span>
+  </body>
+  <script>
+    async function handleDigitChange(newValue, index) {
+      const digitContainerElem = document.querySelector(`span#d${index + 1}`);
+      const previousDigitElem =
+        digitContainerElem.querySelector(".digit:first-child");
+      const newDigitElem = document.createElement("div");
+      newDigitElem.classList.add("digit");
+      newDigitElem.innerHTML = newValue;
+
+      const transitionDuration = 0.5; // in Second
+      const transitionStep = 0.05;
+      const transition = new Promise((res, rej) => {
+        let margin = 0;
+        const i = setInterval(() => {
+          previousDigitElem.setAttribute("style", `margin-top: -${margin}em`);
+          margin += transitionStep;
+          if (margin >= 1) {
+            clearInterval(i);
+            res();
+          }
+        }, transitionDuration * transitionStep * 1000);
+      });
+
+      digitContainerElem.appendChild(newDigitElem);
+      await transition.then();
+      previousDigitElem.innerHTML = newValue;
+      previousDigitElem.removeAttribute("style");
+      newDigitElem.remove();
+    }
+    function getCurrentTimeDigits() {
+      return new Date()
+        .toTimeString()
+        .substring(0, 8)
+        .replaceAll(":", "")
+        .split("");
+    }
+
+    let previousDigits = [];
+    let newDigits = [];
+    const i1 = setInterval(() => {
+      newDigits = getCurrentTimeDigits();
+      newDigits.forEach((digit, index) => {
+        if (previousDigits[index] !== digit) {
+          console.log(previousDigits[index], digit);
+          handleDigitChange(digit, index);
+        }
+      });
+      previousDigits = newDigits;
+    }, 500);
+  </script>
+</html>
